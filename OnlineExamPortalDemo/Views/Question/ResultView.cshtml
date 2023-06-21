@@ -1,0 +1,24 @@
+﻿@model QuizResult
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<AppUser> UserManager
+
+@{
+	int userId = Model.UserId;
+	string uid = userId.ToString();
+	var user = await UserManager.FindByIdAsync(uid);
+}
+<h4>User Id: @Model.UserId</h4>
+<h4>User Name:@user</h4>
+<h4>Score: @Model.Score Out of 8</h4>
+@if (Model.Score < 4)
+{
+	<h3>You have failed the exam.</h3>
+}
+else
+{
+	<h3>Congratulations!!! You have passed the exam.</h3>
+}
+
+
+
+

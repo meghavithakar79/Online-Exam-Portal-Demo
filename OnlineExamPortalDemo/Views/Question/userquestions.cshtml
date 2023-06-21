@@ -1,0 +1,213 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Security.Claims;
+@model OnlineExamPortalDemo.Models.PageList<Question>
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+	string myValue = HttpContextAccessor.HttpContext.Session.GetString("uans");
+}
+
+
+<h1>Questions</h1>
+<label for="" class="form-label" id="timer"></label>
+
+@foreach (var que in Model)
+{
+
+
+
+
+	<div class="mb-3">
+		<label for="" class="form-label">Question :</label>
+		@Html.DisplayFor(modelitem=> que.Question1)
+
+	</div>
+	<div class="mb-3">
+		@{
+			string ext = System.IO.Path.GetExtension(que.Filepath);
+			if (ext == ".jpg" || ext == ".png")
+			{
+				<img src="@que.Filepath" width="200" height="200" alt="img" />
+			}
+			if (ext == ".mp3" || ext == ".wav")
+			{
+				<audio controls autobuffer="autobuffer" autoplay>
+					<source src="@que.Filepath" type="audio/mp3">
+				</audio>
+			}
+		}
+
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">Option1 :</label>
+		<input type="radio" id="op1" name="que" value="@que.Option1" @(que.Option1== myValue ? "checked" : "")
+		   /> @que.Option1
+
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">option2 :</label>
+		<input type="radio" id="op2" name="que" value="@que.Option2" @(que.Option2 == myValue? "checked" : "")
+		   /> @que.Option2
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">option3 :</label>
+		<input type="radio" id="op3" name="que" value="@que.Option3" @(que.Option3 == myValue ? "checked" : "")
+		   /> @que.Option3
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">option4 :</label>
+		<input type="radio" id="op4" name="que" value="@que.Option4" @(que.Option4 == myValue ? "checked" : "")
+		   /> @que.Option4
+	</div>
+	<div class="mb-3">
+	</div>
+	<nav>
+
+		@if (Model.Page.CurrentPage != 1)
+		{
+			<a @*asp-action="userquestions"*@ id="prevbtn"
+	   @*asp-route-pageNumber="@(Model.Page.CurrentPage - 1)"*@
+	   onclick="navPreviousPage(@que.Id - 1)"
+	   class="btn btn-primary">
+				Previous
+			</a>
+		}
+		@if (Model.Page.CurrentPage != 8)
+		{
+			<a id="nxtbtn"
+	   class="btn btn-primary" onclick="checkAnswer(@que.Id)">
+				Next
+			</a>
+
+		}
+		@if (Model.Page.CurrentPage > 7)
+		{
+			<a id="submitbtn"
+	   class="btn btn-primary " onclick="submitAnswer(@que.Id)">
+				Submit Quiz
+			</a>
+
+		}
+
+	</nav>
+}
+@section Scripts {
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/jquery/dist/jquery.js"></script>
+	<script type="text/javascript">
+
+		var timeLimit = 30;
+
+		var timerDisplay = document.getElementById('timer');
+		var nextButton = document.getElementById('nxtbtn');
+
+		var timeLeft = timeLimit;
+
+		var timer = setInterval(function () {
+			timeLeft--;
+			timerDisplay.innerHTML = "Time left: " + timeLeft + " seconds";
+			if (timeLeft <= 0) {
+				clearInterval(timer);
+				nextButton.click();
+			}
+		}, 1000);
+
+		var currentPage = @(Model.Page.CurrentPage);
+		function navPreviousPage(id) {
+			debugger;
+			//console.log(10);
+			var formData = new FormData();
+			//var answer = $("input[name=que]:checked").val();
+			var userId = @User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			formData.append("id", id);
+			//formData.append("answer", answer);
+			formData.append("userId", userId);
+			debugger;
+			$.ajax({
+				url: "/Question/PreviousPage",
+				method: "GET",
+				data: {
+					id: id,
+					//answer: answer,
+					userId: userId
+				},
+				contentType: "application/json",
+				dataType: "json",
+				success: function (response) {
+					window.location.href = '/Question/userquestions?pageNumber=' + (currentPage - 1);
+				},
+				failure: function (response) {
+					alert(response.responseText);
+				},
+				error: function (response) {
+					alert(response.responseText);
+				}
+			});
+		}
+
+		function checkAnswer(id) {
+			debugger;
+			var formData = new FormData();
+			var answer = $("input[name=que]:checked").val();
+			var userId = @User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			formData.append("id", id);
+			formData.append("answer", answer);
+			formData.append("userId", userId);
+			debugger;
+			$.ajax({
+				url: "/Question/IsAnswerCorrect",
+				method: "GET",
+				data: {
+					id: id,
+					answer: answer,
+					userId: userId
+				},
+				contentType: "application/json",
+				dataType: "json",
+				success: function (response) {
+					window.location.href = '/Question/userquestions?pageNumber=' + (currentPage + 1);
+				},
+				failure: function (response) {
+					alert(response.responseText);
+				},
+				error: function (response) {
+					alert(response.responseText);
+				}
+			});
+		}
+
+
+		function submitAnswer(id) {
+			debugger;
+			var formData = new FormData();
+			var answer = $("input[name=que]:checked").val();
+			var userId = @User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			formData.append("id", id);
+			formData.append("answer", answer);
+			formData.append("userId", userId);
+			debugger;
+			$.ajax({
+				url: "/Question/SubmitQuiz",
+				method: "GET",
+				data: {
+					id: id,
+					answer: answer,
+					userId: userId
+				},
+				contentType: "application/json",
+				dataType: "json",
+				success: function (response) {
+					window.location.href = '/Question/ResultView';
+				},
+				failure: function (response) {
+					alert(response.responseText);
+				},
+				error: function (response) {
+					alert(response.responseText);
+				}
+			});
+		}
+	</script>
+}

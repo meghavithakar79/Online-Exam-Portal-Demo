@@ -1,0 +1,50 @@
+﻿@model OnlineExamPortalDemo.Models.Question
+
+<h1>Update Question</h1>
+<form method="post" action="Edit" class="mt-5" enctype="multipart/form-data">
+	<div class="mb-3">
+		<label for="" class="form-label">Id</label>
+		<input type="text" class="form-control" asp-for="Id" readonly>
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">Question</label>
+		<input type="text" class="form-control" asp-for="Question1" required>
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">Option1</label>
+		<input type="text" class="form-control" asp-for="Option1" required>
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">Option2</label>
+		<input type="text" class="form-control" asp-for="Option2" required>
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">Option3</label>
+		<input type="text" class="form-control" asp-for="Option3" required>
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">Option4</label>
+		<input type="text" class="form-control" asp-for="Option4" required>
+	</div>
+	<div class="mb-3">
+		<label for="" class="form-label">correct-answer</label>
+		<input type="text" class="form-control" asp-for="Correctans" required>
+	</div>
+	<div class="mb-3">
+
+		@{
+			if (Model.ext == ".jpg" || Model.ext == ".png")
+			{
+				<img src="@Model.Filepath" width="200" height="200" alt="img" />
+			}
+			if (Model.ext == ".mp3" || Model.ext == ".wav")
+			{
+				<audio controls autobuffer="autobuffer" autoplay>
+					<source src="@Model.Filepath" type="audio/mp3">
+				</audio>
+			}
+		}
+		<input class="form-control" asp-for="files" required>
+	</div>
+	<button type="submit" class="btn btn-primary">Submit</button>
+</form>
